@@ -1,12 +1,18 @@
 # Dependencies (Do not upload these!)
 node_modules/
 client/node_modules/
-server/node_modules/
+services/node_modules/
+services/student-service/node_modules/
+services/course-service/node_modules/
+services/audit-service/node_modules/
 
 # Environment Variables (Protect your passwords!)
 .env
 client/.env
-server/.env
+services/.env
+services/student-service/.env
+services/course-service/.env
+services/audit-service/.env
 
 # Production / Build Folders
 build/
