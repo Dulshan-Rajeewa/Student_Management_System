@@ -1,0 +1,139 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* prevents scrolling */
+}
+
+
+/* Full screen container */
+.login-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Left side - Image Cover */
+.login-left {
+  flex: 1;
+  background-color: #f0f2f5;
+  display: flex;
+}
+
+.login-left img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* This makes the image fill the space perfectly */
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+
+}
+
+/* Right side - Form Area */
+.login-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 420px;
+  padding: 40px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.logo {
+  max-width: 400px;
+  margin-bottom: 20px;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none; /* optional */
+
+}
+
+.login-box h2 {
+  font-size: 28px;
+  margin-bottom: 40px;
+  color: #333;
+}
+
+/* Form Inputs */
+.input-group {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box; /* Ensures padding doesn't widen the box */
+}
+
+/* Links and Buttons */
+.forgot-password {
+  display: block;
+  text-align: right;
+  font-size: 12px;
+  color: #666;
+  text-decoration: none;
+  margin-bottom: 30px;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+.login-button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #7bb3d6, #1a4d8c);
+  color: white;
+  border: none;
+  border-radius: 15px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.login-button:hover {
+  background: linear-gradient(90deg, #5a94b8, #0a2f5e);
+  transform: translateY(-2px);
+}
+
+/* Left side */
+.login-left {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  border-top-right-radius: 40px;
+  border-bottom-right-radius: 40px;
+}
+
+/* Right side */
+.login-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  border-top-left-radius: 40px;
+  border-bottom-left-radius: 40px;
+}
