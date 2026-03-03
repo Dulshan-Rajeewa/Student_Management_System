@@ -28,7 +28,6 @@ html, body {
   user-select: none;
   -webkit-user-drag: none;
   pointer-events: none;
-
 }
 
 /* Right side - Form Area */
