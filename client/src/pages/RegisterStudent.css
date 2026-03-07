@@ -5,7 +5,7 @@
   border: 1px solid #eef0f5;
   box-shadow: 0 2px 10px rgba(0,0,0,0.02);
   max-width: 800px;
-  margin-top: 20px;
+  margin: 20px auto;   /* This centers the form */
 }
 
 .form-row {
@@ -46,16 +46,13 @@
 
 /* Unique ID Preview Box */
 .id-preview-box {
-  background: #e8f0fe;
-  color: #1a4d8c;
-  padding: 15px;
+  padding: 10px;
   border-radius: 8px;
   margin-bottom: 20px;
   font-weight: 600;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px dashed #1a4d8c;
 }
 
 /* Course Tags (Search/Enter) */
@@ -67,22 +64,35 @@
 }
 
 .course-tag {
-  background: #f8f9fa;
-  border: 1px solid #ddd;
+  border: 2px solid #cfcfcf;
   padding: 6px 12px;
-  border-radius: 20px;
+  border-radius: 6px;
   font-size: 13px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
+  color: #555;
 }
 
 .course-tag button {
-  background: none;
-  border: none;
-  color: #dc3545;
-  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #6C0002;
+  background: white;
+  color: #6C0002;
+  border-radius: 3px;
+  font-size: 12px;
   font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.course-tag button:hover {
+  background: #dc3545;
+  color: white;
 }
 
 /* Form Buttons */

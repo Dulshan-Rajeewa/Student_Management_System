@@ -30,7 +30,7 @@ const RegisterStudent = () => {
       // Shows a preview. The actual "0001" will be handled by the database later.
       setGeneratedId(`D/${degreeCode}/${intake}/[Auto-Generated]`);
     } else {
-      setGeneratedId('Pending...');
+      setGeneratedId('...');
     }
   }, [degree, intake]);
 
@@ -83,20 +83,12 @@ const RegisterStudent = () => {
       <div className="main-content">
         <div className="dashboard-header">
           <h1>Register New Student</h1>
-          <h2>Enter student and enrollment details</h2>
         </div>
 
         <div className="form-container">
-          
-          {/* Unique ID Display */}
-          <div className="id-preview-box">
-            <span>System Generated Student ID:</span>
-            <span>{generatedId}</span>
-          </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="form-row">
-              <div className="input-group">
+            <div className="input-group">
                 <label>First Name</label>
                 <input type="text" placeholder="Enter First Name" value={firstName} onChange={e => setFirstName(e.target.value)} required />
               </div>
@@ -104,15 +96,11 @@ const RegisterStudent = () => {
                 <label>Last Name</label>
                 <input type="text" placeholder="Enter Last Name" value={lastName} onChange={e => setLastName(e.target.value)} required />
               </div>
-            </div>
-
             <div className="input-group">
               <label>Student Address</label>
               <input type="text" placeholder="Enter Address" value={address} onChange={e => setAddress(e.target.value)} required />
             </div>
-
-            <div className="form-row">
-              <div className="input-group">
+                          <div className="input-group">
                 <label>Student Birthday</label>
                 <input type="date" value={birthday} onChange={e => setBirthday(e.target.value)} required />
               </div>
@@ -120,10 +108,7 @@ const RegisterStudent = () => {
                 <label>National ID Number</label>
                 <input type="text" placeholder="Enter National ID (NIC)" value={nationalId} onChange={e => setNationalId(e.target.value)} required />
               </div>
-            </div>
-
-            <div className="form-row">
-              <div className="input-group">
+            <div className="input-group">
                 <label>Intake</label>
                 <select value={intake} onChange={e => setIntake(e.target.value)} required>
                   <option value="" disabled>Select Intake</option>
@@ -140,7 +125,6 @@ const RegisterStudent = () => {
                   <option value="Computer Science">Computer Science (BCS)</option>
                 </select>
               </div>
-            </div>
 
             {/* Courses: Search / Type to Enter */}
             <div className="input-group">
@@ -155,12 +139,20 @@ const RegisterStudent = () => {
               <div className="course-tags-container">
                 {courses.map((course, index) => (
                   <div key={index} className="course-tag">
-                    {course}
                     <button type="button" onClick={() => removeCourse(course)}>✕</button>
+                    {course}                    
                   </div>
                 ))}
               </div>
             </div>
+
+            
+            {/* Unique ID Display */}
+            <div className="id-preview-box">
+              <span>System Generated Student ID:</span>
+              <span>{generatedId}</span>
+            </div>
+
 
             <div className="form-actions">
               <button type="button" className="btn-clear" onClick={handleClear}>Clear</button>
