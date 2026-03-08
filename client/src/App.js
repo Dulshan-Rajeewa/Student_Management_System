@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import RegisterStudent from './pages/RegisterStudent';
 import ManageStudents from './pages/ManageStudents';
+import Courses from './pages/Courses';
 
 function App() {
   return (
@@ -20,6 +21,8 @@ function App() {
 
           <Route path="/students" element={<ManageStudents />} />
           
+          <Route path="/courses" element={<Courses />} />
+
         </Routes>
       </div>
     </Router>
