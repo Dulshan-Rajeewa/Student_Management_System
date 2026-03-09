@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import RegisterStudent from './pages/RegisterStudent';
 import ManageStudents from './pages/ManageStudents';
 import Courses from './pages/Courses';
+import AuditLogs from './pages/AuditLogs';
 
 function App() {
   return (
@@ -22,6 +23,8 @@ function App() {
           <Route path="/students" element={<ManageStudents />} />
           
           <Route path="/courses" element={<Courses />} />
+
+          <Route path="/audit" element={<AuditLogs />} />
 
         </Routes>
       </div>
