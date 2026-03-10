@@ -237,3 +237,289 @@ input[type="checkbox"] {
   color: #888;
   font-size: 15px;
 }
+
+/* Clickable Name in Table */
+.clickable-name {
+  color: #1a4d8c;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.clickable-name:hover {
+  text-decoration: underline;
+  color: #123663;
+}
+
+/* ================= MODAL STYLES ================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Fix for cutoff: allows top-down scrolling */
+  padding: 40px 20px; /* Safe space top and bottom */
+  overflow-y: auto; /* Fix for cutoff: makes the overlay scrollable */
+  z-index: 1000;
+}
+
+.modal-box {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  animation: modalFadeIn 0.3s ease;
+  margin: auto; /* Ensures it stays centered vertically if screen is taller than modal */
+}
+
+.modal-box.mini {
+  max-width: 400px;
+}
+
+.modal-box.large {
+  max-width: 850px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #1a4d8c;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #888;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.close-btn:hover {
+  color: #dc3545;
+}
+
+.modal-row {
+  display: flex;
+  gap: 15px;
+}
+
+/* Modal Form Inputs */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.input-group label {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.input-group input, 
+.input-group select {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  font-family: 'Poppins', sans-serif;
+  transition: border-color 0.3s;
+}
+
+.input-group input:focus, 
+.input-group select:focus {
+  border-color: #1a4d8c;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.btn-cancel {
+  padding: 10px 20px;
+  background: white;
+  border: 1px solid #ddd;
+  color: #555;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-save {
+  padding: 10px 20px;
+  background: #1a4d8c;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-save:hover {
+  background: #123663;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Student Details View-Only Modal */
+.modal-body-split {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+.modal-left {
+  flex: 1;
+}
+
+.modal-right {
+  flex: 1;
+  background: #f8faff;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #eef0f5;
+}
+
+.modal-section-title {
+  font-size: 16px;
+  color: #1a4d8c;
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-weight: 600;
+  border-bottom: 2px solid #eef0f5;
+  padding-bottom: 8px;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 0;
+}
+
+.detail-item {
+  background: #f8f9fa;
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.detail-item label {
+  display: block;
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 5px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.detail-item p {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.course-history-section {
+  margin-top: 0;
+  border-top: none;
+  padding-top: 0;
+}
+
+.course-history-section h3 {
+  font-size: 16px;
+  color: #1a4d8c;
+  margin-bottom: 15px;
+}
+
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.history-list li {
+  font-size: 13px;
+  color: #555;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+}
+
+.course-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.course-tag {
+  background: #f0f4fa;
+  border: 1px solid #cce0ff;
+  color: #1a4d8c;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.course-tag button {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* History Group Container */
+.history-semester-group {
+  margin-bottom: 15px;
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.history-semester-title {
+  background: #e8f0fe;
+  color: #1a4d8c;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 12px;
+  text-transform: uppercase;
+  border-bottom: 1px solid #eee;
+}
