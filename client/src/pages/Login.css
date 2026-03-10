@@ -14,11 +14,14 @@ html, body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Left side - Image Cover */
+/* Left side - Image (25%) */
 .login-left {
-  flex: 1;
+  flex: 7; /* 7/16 of screen */
   background-color: #f0f2f5;
   display: flex;
+  overflow: hidden;
+  border-top-right-radius: 40px;
+  border-bottom-right-radius: 40px;
 }
 
 .login-left img {
@@ -30,13 +33,15 @@ html, body {
   pointer-events: none;
 }
 
-/* Right side - Form Area */
+/* Right side - Login Area */
 .login-right {
-  flex: 1;
+  flex: 9; /* 9/16 of screen */
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: #ffffff;
+  border-top-left-radius: 40px;
+  border-bottom-left-radius: 40px;
 }
 
 .login-box {
@@ -115,24 +120,4 @@ html, body {
 .login-button:hover {
   background: linear-gradient(90deg, #5a94b8, #0a2f5e);
   transform: translateY(-2px);
-}
-
-/* Left side */
-.login-left {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-  border-top-right-radius: 40px;
-  border-bottom-right-radius: 40px;
-}
-
-/* Right side */
-.login-right {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #ffffff;
-  border-top-left-radius: 40px;
-  border-bottom-left-radius: 40px;
 }
