@@ -1,78 +1,163 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
-import { FiSearch, FiPlus, FiEdit2, FiTrash2, FiX } from "react-icons/fi";
+import { FiSearch, FiPlus, FiEdit2, FiTrash2, FiX, FiCheckCircle, FiAlertTriangle, FiInfo } from "react-icons/fi";
 import './Courses.css';
 
 const Courses = () => {
+  const [courses, setCourses] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Fetch real data from the Backend when the page loads
   useEffect(() => {
     document.title = "Manage Courses | KDU SMS";
+    
+    const fetchCourses = async () => {
+      try {
+        const response = await fetch('http://localhost:8082/api/courses');
+        if (response.ok) {
+          const dbData = await response.json();
+          
+          const formattedCourses = dbData.map(dbCourse => ({
+            id: dbCourse.id,
+            code: dbCourse.course_code,     
+            name: dbCourse.course_name,     
+            credits: dbCourse.credits,
+            description: dbCourse.description,
+            enrolled: 0 
+          }));
+
+          setCourses(formattedCourses); 
+        } else {
+          showMessage("Failed to fetch courses from backend", "error");
+        }
+      } catch (error) {
+        console.error("Error connecting to server:", error);
+      }
+    };
+
+    fetchCourses();
   }, []);
-
-  // Updated dummy data to separate 'credits' from 'enrolled' students count
-  const [courses, setCourses] = useState([
-    { id: '1', code: 'SE3032', name: 'Software Construction', credits: 3, enrolled: 50, description: 'Learn advanced software construction and tools.' },
-    { id: '2', code: 'CS101', name: 'Mobile Computing', credits: 4, enrolled: 120, description: '' },
-    { id: '3', code: 'MA202', name: 'Engineering Mathematics', credits: 3, enrolled: 85, description: '' },
-    { id: '4', code: 'SE3044', name: 'Algorithms & Data Structures', credits: 4, enrolled: 65, description: '' },
-    { id: '5', code: 'SE3055', name: 'Professional Ethics', credits: 2, enrolled: 110, description: '' },
-    { id: '6', code: 'SE3099', name: 'Web Technologies', credits: 3, enrolled: 90, description: '' },
-    { id: '7', code: 'CS205', name: 'Database Management Systems', credits: 4, enrolled: 75, description: '' },
-    { id: '8', code: 'SE4010', name: 'Software Architecture', credits: 3, enrolled: 40, description: '' },
-  ]);
-
-  const [searchTerm, setSearchTerm] = useState('');
 
   // --- MODAL STATES ---
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
-  // Shared state for the form inputs
+  // NEW STATES: For custom alerts and confirms
+  const [confirmDeleteDialog, setConfirmDeleteDialog] = useState({ isOpen: false, id: null, code: null });
+  const [messageDialog, setMessageDialog] = useState({ isOpen: false, message: '', type: 'success' }); // types: success, warning, error
+  
   const [formData, setFormData] = useState({
     id: '', code: '', name: '', credits: '', description: '', enrolled: 0
   });
 
-  // --- LOGIC: FILTERING ---
   const filteredCourses = courses.filter(course => 
     course.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     course.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // --- LOGIC: ADD COURSE ---
+  // --- HELPER FUNCTION FOR MESSAGES ---
+  const showMessage = (msg, type = "success") => {
+    setMessageDialog({ isOpen: true, message: msg, type: type });
+  };
+
+  // --- ADD COURSE LOGIC ---
   const openAddModal = () => {
     setFormData({ id: '', code: '', name: '', credits: '', description: '', enrolled: 0 });
     setIsAddModalOpen(true);
   };
 
-  const handleSaveNewCourse = (e) => {
+  const handleSaveNewCourse = async (e) => {
     e.preventDefault();
-    const newCourse = {
-      ...formData,
-      id: Date.now().toString(), // Generate a fake ID for UI purposes
-      enrolled: 0 // New courses start with 0 students
-    };
-    setCourses([...courses, newCourse]);
-    setIsAddModalOpen(false);
-    alert(`Course ${formData.code} added successfully!`);
+    try {
+      const response = await fetch('http://localhost:8082/api/courses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          course_code: formData.code,
+          course_name: formData.name,
+          description: formData.description,
+          credits: parseInt(formData.credits)
+        }),
+      });
+
+      if (response.ok) {
+        const savedCourse = await response.json();
+        setCourses([...courses, savedCourse]);
+        setIsAddModalOpen(false);
+        // Replace native alert with our custom dialog
+        showMessage(`Course ${savedCourse.code} added successfully!`, "success");
+      } else {
+        showMessage("Failed to save course to database.", "error");
+      }
+    } catch (error) {
+      console.error("Error saving course:", error);
+      showMessage("Server error while saving course.", "error");
+    }
   };
 
-  // --- LOGIC: EDIT COURSE ---
+  // --- EDIT COURSE LOGIC ---
   const openEditModal = (course) => {
     setFormData({ ...course });
     setIsEditModalOpen(true);
   };
 
-  const handleSaveEditCourse = (e) => {
+  const handleSaveEditCourse = async (e) => {
     e.preventDefault();
-    setCourses(courses.map(c => (c.id === formData.id ? formData : c)));
-    setIsEditModalOpen(false);
-    alert(`Course ${formData.code} updated successfully!`);
+    try {
+      const response = await fetch(`http://localhost:8082/api/courses/${formData.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          course_code: formData.code,
+          course_name: formData.name,
+          description: formData.description,
+          credits: parseInt(formData.credits)
+        })
+      });
+
+      if (response.ok) {
+        setCourses(courses.map(c => (c.id === formData.id ? formData : c)));
+        setIsEditModalOpen(false);
+        // Replace native alert
+        showMessage(`Course ${formData.code} updated successfully!`, "success");
+      } else {
+        showMessage("Failed to update course in database.", "error");
+      }
+    } catch (error) {
+      console.error("Error updating course:", error);
+      showMessage("Server error while updating course.", "error");
+    }
   };
 
-  // --- LOGIC: DELETE COURSE ---
-  const handleDeleteCourse = (code) => {
-    if (window.confirm(`Are you sure you want to completely remove course ${code} from the system?`)) {
-      setCourses(courses.filter(c => c.code !== code));
+  // --- DELETE COURSE LOGIC ---
+  
+  // 1. Triggers the custom confirmation modal instead of window.confirm
+  const initiateDelete = (id, code) => {
+    setConfirmDeleteDialog({ isOpen: true, id, code });
+  };
+
+  // 2. Executes when they click "Yes, Delete" in the custom modal
+  const executeDeleteCourse = async () => {
+    const { id, code } = confirmDeleteDialog;
+    
+    try {
+      const response = await fetch(`http://localhost:8082/api/courses/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        setCourses(courses.filter(c => c.id !== id));
+        setConfirmDeleteDialog({ isOpen: false, id: null, code: null });
+        showMessage(`Course ${code} removed successfully!`, "success");
+      } else {
+        setConfirmDeleteDialog({ isOpen: false, id: null, code: null });
+        showMessage("Failed to delete course from database.", "error");
+      }
+    } catch (error) {
+      console.error("Error deleting course:", error);
+      setConfirmDeleteDialog({ isOpen: false, id: null, code: null });
+      showMessage("Server error while deleting course.", "error");
     }
   };
 
@@ -84,7 +169,6 @@ const Courses = () => {
           <h1>Courses</h1>
         </div>
 
-        {/* Top Bar: Search */}
         <div className="courses-top-bar">
           <div className="search-container">
             <input 
@@ -105,7 +189,6 @@ const Courses = () => {
           </button>
         </div>
 
-        {/* Courses Grid */}
         <div className="courses-grid">
           {filteredCourses.length > 0 ? (
             filteredCourses.map((course) => (
@@ -126,7 +209,6 @@ const Courses = () => {
                   </div>
                 </div>
 
-                {/* Edit & Delete Actions */}
                 <div className="course-actions">
                   <button 
                     className="card-icon-btn edit" 
@@ -138,7 +220,8 @@ const Courses = () => {
                   <button 
                     className="card-icon-btn delete" 
                     title="Remove Course"
-                    onClick={() => handleDeleteCourse(course.code)}
+                    // CALLS OUR CUSTOM INITIATE DELETE FUNCTION
+                    onClick={() => initiateDelete(course.id, course.code)}
                   >
                     <FiTrash2 />
                   </button>
@@ -181,7 +264,7 @@ const Courses = () => {
               </div>
               <div className="input-group">
                 <label>Description (Optional)</label>
-                <textarea placeholder="Brief description of the course..." value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
+                <textarea placeholder="Brief description of the course..." value={formData.description || ''} onChange={(e) => setFormData({...formData, description: e.target.value})} />
               </div>
               <div className="modal-actions">
                 <button type="button" className="btn-cancel" onClick={() => setIsAddModalOpen(false)}>Cancel</button>
@@ -217,13 +300,47 @@ const Courses = () => {
               </div>
               <div className="input-group">
                 <label>Description (Optional)</label>
-                <textarea placeholder="Brief description of the course..." value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
+                <textarea placeholder="Brief description of the course..." value={formData.description || ''} onChange={(e) => setFormData({...formData, description: e.target.value})} />
               </div>
               <div className="modal-actions">
                 <button type="button" className="btn-cancel" onClick={() => setIsEditModalOpen(false)}>Cancel</button>
                 <button type="submit" className="btn-save">Update Course</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= DELETE CONFIRMATION MODAL ================= */}
+      {confirmDeleteDialog.isOpen && (
+        <div className="modal-overlay" style={{ zIndex: 1050 }}>
+          <div className="modal-box small">
+            <FiAlertTriangle className="modal-message-icon warning" />
+            <h2>Confirm Deletion</h2>
+            <p>Are you sure you want to completely remove <strong>{confirmDeleteDialog.code}</strong> from the system? This action cannot be undone.</p>
+            
+            <div className="modal-actions justify-center">
+              <button className="btn-cancel" onClick={() => setConfirmDeleteDialog({ isOpen: false, id: null, code: null })}>Cancel</button>
+              <button className="btn-danger" onClick={executeDeleteCourse}>Yes, Delete Course</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= SUCCESS/ERROR MESSAGE MODAL ================= */}
+      {messageDialog.isOpen && (
+        <div className="modal-overlay" style={{ zIndex: 1100 }}>
+          <div className="modal-box small">
+            {messageDialog.type === 'success' && <FiCheckCircle className="modal-message-icon success" />}
+            {messageDialog.type === 'error' && <FiAlertTriangle className="modal-message-icon error" />}
+            {messageDialog.type === 'info' && <FiInfo className="modal-message-icon" style={{ color: '#1a4d8c' }} />}
+            
+            <h2>{messageDialog.type === 'success' ? 'Success!' : messageDialog.type === 'error' ? 'Error' : 'Notice'}</h2>
+            <p>{messageDialog.message}</p>
+            
+            <div className="modal-actions justify-center">
+              <button className="btn-save" onClick={() => setMessageDialog({ isOpen: false, message: '', type: 'success' })}>OK</button>
+            </div>
           </div>
         </div>
       )}

@@ -88,7 +88,7 @@ const AuditLogs = () => {
                 <th>Administrator</th>
                 <th>Activity Type</th>
                 <th>Details</th>
-                <th></th> {/* Empty header for the more icon */}
+                <th /> {/* Empty header for the more icon */}
               </tr>
             </thead>
             <tbody>

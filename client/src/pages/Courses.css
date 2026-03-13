@@ -343,3 +343,58 @@
   from { opacity: 0; transform: translateY(-20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* --- Add this to the BOTTOM of your Courses.css --- */
+
+/* Custom Modal Additions for Messages & Confirmations */
+.modal-box.small {
+  max-width: 400px;
+  text-align: center;
+}
+
+.modal-message-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.modal-message-icon.success {
+  color: #28a745;
+}
+
+.modal-message-icon.warning {
+  color: #ffc107;
+}
+
+.modal-message-icon.error {
+  color: #dc3545;
+}
+
+.modal-box.small h2 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.modal-box.small p {
+  color: #666;
+  margin-bottom: 25px;
+  font-size: 15px;
+}
+
+.btn-danger {
+  padding: 10px 20px;
+  background: #dc3545;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.btn-danger:hover {
+  background: #c82333;
+}
+
+.justify-center {
+  justify-content: center;
+}
