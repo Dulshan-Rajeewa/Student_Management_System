@@ -121,3 +121,13 @@ html, body {
   background: linear-gradient(90deg, #5a94b8, #0a2f5e);
   transform: translateY(-2px);
 }
+
+.login-error {
+  background-color: #ffeeee;
+  color: #dc3545;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 20px;
+  border: 1px solid #ffcccc;
+}

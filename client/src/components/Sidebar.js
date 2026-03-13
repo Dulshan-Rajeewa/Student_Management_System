@@ -1,10 +1,30 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { FiHome, FiUserPlus, FiUsers, FiBook, FiFileText, FiSettings, FiHelpCircle, FiLogOut } from 'react-icons/fi';
 import './Sidebar.css';
 import logoImg from '../assets/logos/kdu-logo.png'; // Make sure this path is correct!
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+  const [adminName, setAdminName] = useState('Administrator');
+  const [adminInitial, setAdminInitial] = useState('A');
+
+  // Fetch logged-in user from localStorage when the sidebar loads
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem('currentAdmin');
+    if (savedAdmin) {
+      const parsedAdmin = JSON.parse(savedAdmin);
+      setAdminName(parsedAdmin.name);
+      setAdminInitial(parsedAdmin.name.charAt(0).toUpperCase()); // Gets the first letter for the Avatar
+    }
+  }, []);
+
+  const handleLogout = () => {
+    // Clear the memory and send them back to the login page
+    localStorage.removeItem('currentAdmin');
+    navigate('/');
+  };
+
   return (
     <div className="sidebar-container">
       {/* Top Logo */}
@@ -51,15 +71,18 @@ const Sidebar = () => {
             <NavLink to="/support" className="sidebar-link"><FiHelpCircle className="menu-icon" /> Support</NavLink>
           </li>
           <li>
-            <NavLink to="/" className="sidebar-link"><FiLogOut className="menu-icon" /> Logout</NavLink>
+            {/* Replaced NavLink with a Button that triggers handleLogout, styled to look like a link */}
+            <button onClick={handleLogout} className="sidebar-link" style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', textAlign: 'left' }}>
+              <FiLogOut className="menu-icon" /> Logout
+            </button>
           </li>
         </ul>
         
         <div className="user-profile">
-          <div className="avatar">D</div>
+          <div className="avatar">{adminInitial}</div>
           <div className="user-info">
             <p>Welcome back</p>
-            <h4>Dulshan</h4>
+            <h4>{adminName}</h4>
           </div>
         </div>
       </div>
