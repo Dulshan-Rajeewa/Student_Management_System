@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 import { FiSearch, FiEdit2, FiTrash2, FiX, FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
 import './ManageStudents.css';
+import { logActivity } from '../utils/auditLogger';
 
 const ManageStudents = () => {
   const [students, setStudents] = useState([]);
@@ -106,6 +107,7 @@ const ManageStudents = () => {
         triggerRefetch();
         setConfirmDeleteDialog({ isOpen: false, uuid: null, studentId: null });
         showMessage(`Student ${studentId} removed from system.`, "success");
+        logActivity('DELETE', 'STUDENT', studentId, `Deleted student from the system`);
       }
     } catch (err) { showMessage("Error removing student.", "error"); }
   };
@@ -169,6 +171,7 @@ const ManageStudents = () => {
         triggerRefetch();
         setIsEditModalOpen(false);
         showMessage("Student details updated successfully!", "success");
+        logActivity('UPDATE', 'STUDENT', editingStudent.id, `Updated profile/enrollments for student`);
       } else showMessage("Failed to update student.", "error");
     } catch (err) { showMessage("Server Error", "error"); }
   };
@@ -185,6 +188,7 @@ const ManageStudents = () => {
         triggerRefetch();
         setIsSemesterModalOpen(false); setBulkCourses([]); setSelectedIds([]);
         showMessage(`Upgraded ${selectedIds.length} students to next semester!`, "success");
+        logActivity('UPDATE', 'STUDENT', 'BULK', `Upgraded semester for ${selectedIds.length} students`);
       }
     } catch (err) { showMessage("Server Error", "error"); }
   };
@@ -201,6 +205,7 @@ const ManageStudents = () => {
         triggerRefetch();
         setIsCourseModalOpen(false); setBulkCourses([]); setSelectedIds([]);
         showMessage(`Added courses to ${selectedIds.length} students!`, "success");
+        logActivity('UPDATE', 'STUDENT', 'BULK', `Added bulk courses to ${selectedIds.length} students`);
       }
     } catch (err) { showMessage("Server Error", "error"); }
   };

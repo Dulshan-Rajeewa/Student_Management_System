@@ -5,27 +5,44 @@ import { FiChevronLeft, FiChevronRight, FiMoreHorizontal } from 'react-icons/fi'
 import './AuditLogs.css';
 
 const AuditLogs = () => {
-  useEffect(() => {
-    document.title = "System Audit Logs | KDU SMS";
-  }, []);
-
-  // 1. DUMMY DATA STATE (View Only)
-  const [logs] = useState([
-    { id: 1, date: '2026-01-28', time: '10:00 AM', admin: 'Dulshan', type: 'CREATE', details: 'Registered Student ID D/BSE/24/0001' },
-    { id: 2, date: '2026-01-28', time: '10:15 AM', admin: 'Dulshan', type: 'UPDATE', details: 'Modified Student ID D/BSE/24/0002' },
-    { id: 3, date: '2026-01-28', time: '03:00 PM', admin: 'Behan', type: 'DELETE', details: 'Deleted Student ID D/BSE/24/0001' },
-    { id: 4, date: '2026-01-27', time: '09:30 AM', admin: 'Dulshan', type: 'CREATE', details: 'Registered Student ID D/BCS/24/0014' },
-    { id: 5, date: '2026-01-26', time: '11:00 AM', admin: 'Behan', type: 'UPDATE', details: 'Added course SE3032 to Intake 41' },
-    { id: 6, date: '2026-01-25', time: '02:00 PM', admin: 'Dulshan', type: 'CREATE', details: 'Registered Student ID D/BSE/24/0015' },
-  ]);
-
-  // 2. FILTER STATES
+  const [logs, setLogs] = useState([]);
   const [filterDate, setFilterDate] = useState('All');
   const [filterAdmin, setFilterAdmin] = useState('All');
 
-  // 3. PAGINATION STATES
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 8; // Increased to 8 to show more logs
+
+  // --- FETCH REAL AUDIT LOGS ---
+  useEffect(() => {
+    document.title = "System Audit Logs | KDU SMS";
+    
+    const fetchLogs = async () => {
+      try {
+        const response = await fetch('http://localhost:8083/api/audit');
+        if (response.ok) {
+          const dbLogs = await response.json();
+          
+          // Format the data from the database
+          const formattedLogs = dbLogs.map(log => {
+            const dateObj = new Date(log.timestamp);
+            return {
+              id: log.log_id,
+              date: dateObj.toLocaleDateString('en-CA'), // e.g. 2026-03-14
+              time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              admin: log.admin_id,
+              type: log.action_type,
+              details: log.details
+            };
+          });
+          setLogs(formattedLogs);
+        }
+      } catch (error) {
+        console.error("Error fetching audit logs:", error);
+      }
+    };
+
+    fetchLogs();
+  }, []);
 
   // --- LOGIC: FILTERING ---
   const filteredLogs = logs.filter(log => {
@@ -40,12 +57,10 @@ const AuditLogs = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentLogs = filteredLogs.slice(indexOfFirstItem, indexOfLastItem);
 
-  // Reset to page 1 if filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [filterDate, filterAdmin]);
 
-  // Helper function for badge colors
   const getBadgeClass = (type) => {
     switch(type) {
       case 'CREATE': return 'activity-badge create';
@@ -55,6 +70,10 @@ const AuditLogs = () => {
     }
   };
 
+  // Get unique dates and admins for the dropdowns
+  const uniqueDates = [...new Set(logs.map(log => log.date))];
+  const uniqueAdmins = [...new Set(logs.map(log => log.admin))];
+
   return (
     <div className="dashboard-layout">
       <Sidebar />
@@ -63,19 +82,16 @@ const AuditLogs = () => {
           <h1>System Audit Logs</h1>
         </div>
 
-        {/* Dropdown Filters (Matching Figma) */}
+        {/* Dropdown Filters */}
         <div className="filter-group">
           <select className="filter-select" value={filterDate} onChange={e => setFilterDate(e.target.value)}>
             <option value="All">🕒 Filter by Date (All)</option>
-            <option value="2026-01-28">2026-01-28</option>
-            <option value="2026-01-27">2026-01-27</option>
-            <option value="2026-01-26">2026-01-26</option>
+            {uniqueDates.map(date => <option key={date} value={date}>{date}</option>)}
           </select>
 
           <select className="filter-select" value={filterAdmin} onChange={e => setFilterAdmin(e.target.value)}>
             <option value="All">👤 Filter by Admin (All)</option>
-            <option value="Dulshan">Dulshan</option>
-            <option value="Behan">Behan</option>
+            {uniqueAdmins.map(admin => <option key={admin} value={admin}>{admin}</option>)}
           </select>
         </div>
 
@@ -88,7 +104,7 @@ const AuditLogs = () => {
                 <th>Administrator</th>
                 <th>Activity Type</th>
                 <th>Details</th>
-                <th /> {/* Empty header for the more icon */}
+                <th />
               </tr>
             </thead>
             <tbody>
@@ -100,20 +116,14 @@ const AuditLogs = () => {
                       <span style={{ fontSize: '12px', color: '#888' }}>{log.time}</span>
                     </td>
                     <td>{log.admin}</td>
-                    <td>
-                      <span className={getBadgeClass(log.type)}>
-                        {log.type}
-                      </span>
-                    </td>
+                    <td><span className={getBadgeClass(log.type)}>{log.type}</span></td>
                     <td>{log.details}</td>
-                    <td style={{ textAlign: 'center' }}>
-                      <FiMoreHorizontal className="more-icon" />
-                    </td>
+                    <td style={{ textAlign: 'center' }}><FiMoreHorizontal className="more-icon" /></td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="empty-state">No audit logs found for the selected filters.</td>
+                  <td colSpan="5" className="empty-state">No audit logs found.</td>
                 </tr>
               )}
             </tbody>
@@ -125,23 +135,9 @@ const AuditLogs = () => {
               Showing <strong>{currentLogs.length > 0 ? indexOfFirstItem + 1 : 0} - {indexOfFirstItem + currentLogs.length}</strong> from <strong>{filteredLogs.length}</strong> data
             </span>
             <div className="page-numbers">
-              <button 
-                className="page-num" 
-                disabled={currentPage === 1} 
-                onClick={() => setCurrentPage(currentPage - 1)}
-              >
-                <FiChevronLeft />
-              </button>
-              
+              <button className="page-num" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}><FiChevronLeft /></button>
               <div className="page-num active">{currentPage}</div>
-              
-              <button 
-                className="page-num" 
-                disabled={currentPage === totalPages || totalPages === 0} 
-                onClick={() => setCurrentPage(currentPage + 1)}
-              >
-                <FiChevronRight />
-              </button>
+              <button className="page-num" disabled={currentPage === totalPages || totalPages === 0} onClick={() => setCurrentPage(currentPage + 1)}><FiChevronRight /></button>
             </div>
           </div>
         </div>

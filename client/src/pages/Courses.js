@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 import { FiSearch, FiPlus, FiEdit2, FiTrash2, FiX, FiCheckCircle, FiAlertTriangle, FiInfo } from "react-icons/fi";
 import './Courses.css';
+import { logActivity } from '../utils/auditLogger';
 
 const Courses = () => {
   const [courses, setCourses] = useState([]);
@@ -93,6 +94,7 @@ const Courses = () => {
         }]);
         setIsAddModalOpen(false);
         showMessage(`Course ${savedCourse.code} added successfully!`, "success");
+        logActivity('CREATE', 'COURSE', savedCourse.code, `Created new course: ${savedCourse.name}`);
       } else {
         showMessage("Failed to save course to database.", "error");
       }
@@ -126,6 +128,7 @@ const Courses = () => {
         setCourses(courses.map(c => (c.id === formData.id ? formData : c)));
         setIsEditModalOpen(false);
         showMessage(`Course ${formData.code} updated successfully!`, "success");
+        logActivity('UPDATE', 'COURSE', formData.code, `Updated course details for ${formData.name}`);
       } else {
         showMessage("Failed to update course in database.", "error");
       }
@@ -152,6 +155,7 @@ const Courses = () => {
         setCourses(courses.filter(c => c.id !== id));
         setConfirmDeleteDialog({ isOpen: false, id: null, code: null });
         showMessage(`Course ${code} removed successfully!`, "success");
+        logActivity('DELETE', 'COURSE', code, `Permanently deleted course ${code}`);
       } else {
         setConfirmDeleteDialog({ isOpen: false, id: null, code: null });
         showMessage("Failed to delete course from database.", "error");

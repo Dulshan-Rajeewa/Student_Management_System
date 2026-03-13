@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 import { FiCheckCircle, FiAlertTriangle } from "react-icons/fi";
 import './RegisterStudent.css';
+import { logActivity } from '../utils/auditLogger';
 
 const RegisterStudent = () => {
   useEffect(() => {
@@ -122,6 +123,7 @@ const RegisterStudent = () => {
 
       if (response.ok) {
         showMessage(`Student ${firstName} ${lastName} (${generatedId}) registered successfully!`, "success");
+        logActivity('CREATE', 'STUDENT', generatedId, `Registered new student: ${firstName} ${lastName}`);
         handleClear();
       } else {
         showMessage("Failed to register student. National ID or Student Number might already exist.", "error");
