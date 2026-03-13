@@ -24,7 +24,8 @@ const Courses = () => {
             name: dbCourse.course_name,     
             credits: dbCourse.credits,
             description: dbCourse.description,
-            enrolled: 0 
+            // UPDATED: Now dynamically reads the count from the backend!
+            enrolled: dbCourse.enrolled_count || 0 
           }));
 
           setCourses(formattedCourses); 
@@ -43,9 +44,8 @@ const Courses = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
-  // NEW STATES: For custom alerts and confirms
   const [confirmDeleteDialog, setConfirmDeleteDialog] = useState({ isOpen: false, id: null, code: null });
-  const [messageDialog, setMessageDialog] = useState({ isOpen: false, message: '', type: 'success' }); // types: success, warning, error
+  const [messageDialog, setMessageDialog] = useState({ isOpen: false, message: '', type: 'success' });
   
   const [formData, setFormData] = useState({
     id: '', code: '', name: '', credits: '', description: '', enrolled: 0
@@ -56,7 +56,6 @@ const Courses = () => {
     course.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // --- HELPER FUNCTION FOR MESSAGES ---
   const showMessage = (msg, type = "success") => {
     setMessageDialog({ isOpen: true, message: msg, type: type });
   };
@@ -83,9 +82,16 @@ const Courses = () => {
 
       if (response.ok) {
         const savedCourse = await response.json();
-        setCourses([...courses, savedCourse]);
+        // Add course to UI list with 0 enrollments initially
+        setCourses([...courses, {
+            id: savedCourse.id,
+            code: savedCourse.code,
+            name: savedCourse.name,
+            description: savedCourse.description,
+            credits: savedCourse.credits,
+            enrolled: savedCourse.enrolled_count
+        }]);
         setIsAddModalOpen(false);
-        // Replace native alert with our custom dialog
         showMessage(`Course ${savedCourse.code} added successfully!`, "success");
       } else {
         showMessage("Failed to save course to database.", "error");
@@ -119,7 +125,6 @@ const Courses = () => {
       if (response.ok) {
         setCourses(courses.map(c => (c.id === formData.id ? formData : c)));
         setIsEditModalOpen(false);
-        // Replace native alert
         showMessage(`Course ${formData.code} updated successfully!`, "success");
       } else {
         showMessage("Failed to update course in database.", "error");
@@ -131,13 +136,10 @@ const Courses = () => {
   };
 
   // --- DELETE COURSE LOGIC ---
-  
-  // 1. Triggers the custom confirmation modal instead of window.confirm
   const initiateDelete = (id, code) => {
     setConfirmDeleteDialog({ isOpen: true, id, code });
   };
 
-  // 2. Executes when they click "Yes, Delete" in the custom modal
   const executeDeleteCourse = async () => {
     const { id, code } = confirmDeleteDialog;
     
@@ -220,7 +222,6 @@ const Courses = () => {
                   <button 
                     className="card-icon-btn delete" 
                     title="Remove Course"
-                    // CALLS OUR CUSTOM INITIATE DELETE FUNCTION
                     onClick={() => initiateDelete(course.id, course.code)}
                   >
                     <FiTrash2 />

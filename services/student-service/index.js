@@ -14,24 +14,15 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-// --- API ROUTES ---
+app.get('/api/students/health', (req, res) => res.send('Student Service up!'));
 
-app.get('/api/students/health', (req, res) => {
-  res.send('Student Service is up and running on Port 8081!');
-});
-
-// 1. NEW: Generate Next Student ID
+// 1. Generate Next Student ID
 app.get('/api/students/generate-id', async (req, res) => {
   try {
     const { degree, intake } = req.query;
-    if (!degree || !intake) return res.status(400).json({ error: 'Missing parameters' });
-
-    // Calculate year based on your KDU pattern (Intake 41 = 2024 -> Year 24)
-    // Formula: Intake - 17 = Year (41 - 17 = 24)
     const year = parseInt(intake) - 17;
     const prefix = `D/${degree}/${year}/`;
 
-    // Find the last registered student in this specific intake and degree
     const result = await pool.query(
       `SELECT student_number FROM students WHERE student_number LIKE $1 ORDER BY student_number DESC LIMIT 1`,
       [`${prefix}%`]
@@ -39,79 +30,196 @@ app.get('/api/students/generate-id', async (req, res) => {
 
     let nextNumber = 1;
     if (result.rows.length > 0) {
-      // Extract the last 4 digits (e.g., "0001" -> 1) and add 1
-      const lastId = result.rows[0].student_number;
-      const lastDigits = lastId.split('/').pop();
+      const lastDigits = result.rows[0].student_number.split('/').pop();
       nextNumber = parseInt(lastDigits) + 1;
     }
 
-    // Pad with zeros to ensure it is 4 digits (e.g., 2 becomes "0002")
-    const formattedNumber = nextNumber.toString().padStart(4, '0');
-    const generatedId = `${prefix}${formattedNumber}`;
-
-    res.json({ generatedId });
+    res.json({ generatedId: `${prefix}${nextNumber.toString().padStart(4, '0')}` });
   } catch (err) {
-    console.error("Error generating ID:", err.message);
     res.status(500).json({ error: "Failed to generate ID" });
   }
 });
 
-// 2. UPDATED: Add Student AND Enrollments (Using SQL Transactions)
+// 2. Add Student AND Enrollments
 app.post('/api/students', async (req, res) => {
-  const client = await pool.connect(); // Use a dedicated client for transactions
+  const client = await pool.connect(); 
   try {
     const { student_number, intake_number, first_name, last_name, address, birthday, degree_program, courses } = req.body;
+    await client.query('BEGIN'); 
 
-    await client.query('BEGIN'); // Start Transaction
-
-    // Step A: Insert into Students Table
     const newStudent = await client.query(
       `INSERT INTO students (student_number, intake_number, first_name, last_name, address, birthday, degree_program)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, student_number`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
       [student_number, intake_number, first_name, last_name, address, birthday, degree_program]
     );
 
-    const newStudentId = newStudent.rows[0].id;
-
-    // Step B: Insert into Enrollments Table (if courses were provided)
     if (courses && courses.length > 0) {
       for (const courseCode of courses) {
-        // Look up the unique course UUID from the DB using the course_code
         const courseRes = await client.query('SELECT id FROM courses WHERE course_code = $1', [courseCode]);
-        
         if (courseRes.rows.length > 0) {
-          const courseId = courseRes.rows[0].id;
-          // Enroll the student in Semester 1
           await client.query(
             `INSERT INTO enrollments (student_id, course_id, semester) VALUES ($1, $2, $3)`,
-            [newStudentId, courseId, 1]
+            [newStudent.rows[0].id, courseRes.rows[0].id, 1]
           );
         }
       }
     }
-
-    await client.query('COMMIT'); // Save all changes
-    res.status(201).json(newStudent.rows[0]);
+    await client.query('COMMIT'); 
+    res.status(201).json({ success: true });
   } catch (err) {
-    await client.query('ROLLBACK'); // If anything fails, undo the whole transaction!
-    console.error("Error adding student:", err.message);
-    res.status(500).json({ error: "Failed to add student to the database." });
+    await client.query('ROLLBACK'); 
+    res.status(500).json({ error: "Failed to add student" });
   } finally {
     client.release();
   }
 });
 
-// 3. Get All Students
+// 3. GET ALL STUDENTS (With their courses)
 app.get('/api/students', async (req, res) => {
   try {
-    const allStudents = await pool.query('SELECT * FROM students ORDER BY registration_date DESC');
-    res.json(allStudents.rows);
+    const query = `
+      SELECT 
+        s.id as uuid, s.student_number as id, s.first_name, s.last_name, s.degree_program as degree, 
+        s.intake_number as intake, s.status, s.address, s.birthday, s.current_semester,
+        COALESCE(json_agg(json_build_object('code', c.course_code, 'name', c.course_name, 'sem', e.semester)) FILTER (WHERE c.id IS NOT NULL), '[]') as enrollments
+      FROM students s
+      LEFT JOIN enrollments e ON s.id = e.student_id
+      LEFT JOIN courses c ON e.course_id = c.id
+      GROUP BY s.id ORDER BY s.registration_date DESC;
+    `;
+    const { rows } = await pool.query(query);
+    res.json(rows);
   } catch (err) {
-    console.error("Error fetching students:", err.message);
-    res.status(500).json({ error: "Failed to retrieve students." });
+    res.status(500).json({ error: "Failed to retrieve students" });
   }
 });
 
-app.listen(port, () => {
-  console.log(`🚀 Student Service is running on http://localhost:${port}`);
+// 4. UPDATE STUDENT (Personal Info & Current Courses)
+app.put('/api/students/:uuid', async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { uuid } = req.params;
+    const { name, address, status, currentCourses } = req.body;
+    
+    const [first_name, ...lastNameArr] = name.split(' ');
+    const last_name = lastNameArr.join(' ') || '';
+
+    // Update Details
+    await client.query(
+      `UPDATE students SET first_name = $1, last_name = $2, address = $3, status = $4 WHERE id = $5`,
+      [first_name, last_name, address, status, uuid]
+    );
+
+    // Update Enrollments: Remove old current-semester courses, insert new ones
+    const sRes = await client.query(`SELECT current_semester FROM students WHERE id = $1`, [uuid]);
+    const currentSem = sRes.rows[0].current_semester;
+
+    await client.query(`DELETE FROM enrollments WHERE student_id = $1 AND semester = $2`, [uuid, currentSem]);
+
+    for(const courseStr of currentCourses) {
+      const code = courseStr.split(' - ')[0]; 
+      const cRes = await client.query(`SELECT id FROM courses WHERE course_code = $1`, [code]);
+      if(cRes.rows.length > 0) {
+        await client.query(`INSERT INTO enrollments (student_id, course_id, semester) VALUES ($1, $2, $3)`, [uuid, cRes.rows[0].id, currentSem]);
+      }
+    }
+
+    await client.query('COMMIT');
+    res.json({ message: "Updated Successfully" });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    res.status(500).json({ error: "Failed to update student" });
+  } finally {
+    client.release();
+  }
 });
+
+// 5. BULK UPGRADE SEMESTER (UPDATED: Marks old courses as 'Completed')
+app.post('/api/students/bulk-upgrade', async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { studentIds, courses } = req.body;
+    
+    for (const uuid of studentIds) {
+      // 1. Mark all CURRENT active courses as 'Completed'
+      await client.query(
+        `UPDATE enrollments SET status = 'Completed' WHERE student_id = $1 AND status = 'Active'`, 
+        [uuid]
+      );
+
+      // 2. Upgrade the student's semester
+      const sRes = await client.query(
+        `UPDATE students SET current_semester = current_semester + 1 WHERE id = $1 RETURNING current_semester`, 
+        [uuid]
+      );
+      const newSem = sRes.rows[0].current_semester;
+
+      // 3. Add the new courses as 'Active'
+      for(const courseStr of courses) {
+        const code = courseStr.split(' - ')[0];
+        const cRes = await client.query(`SELECT id FROM courses WHERE course_code = $1`, [code]);
+        if(cRes.rows.length > 0) {
+          await client.query(
+            `INSERT INTO enrollments (student_id, course_id, semester, status) VALUES ($1, $2, $3, 'Active')`, 
+            [uuid, cRes.rows[0].id, newSem]
+          );
+        }
+      }
+    }
+    await client.query('COMMIT');
+    res.json({ message: "Upgraded Successfully" });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error("Upgrade error:", err.message);
+    res.status(500).json({ error: "Failed to upgrade semester" });
+  } finally {
+    client.release();
+  }
+});
+
+// 6. BULK ADD COURSE
+app.post('/api/students/bulk-enroll', async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { studentIds, courses } = req.body;
+    
+    for (const uuid of studentIds) {
+      const sRes = await client.query(`SELECT current_semester FROM students WHERE id = $1`, [uuid]);
+      const currentSem = sRes.rows[0].current_semester;
+
+      for(const courseStr of courses) {
+        const code = courseStr.split(' - ')[0];
+        const cRes = await client.query(`SELECT id FROM courses WHERE course_code = $1`, [code]);
+        if(cRes.rows.length > 0) {
+          // Prevent duplicate enrollments in the same semester
+          const exist = await client.query(`SELECT 1 FROM enrollments WHERE student_id = $1 AND course_id = $2 AND semester = $3`, [uuid, cRes.rows[0].id, currentSem]);
+          if(exist.rows.length === 0) {
+            await client.query(`INSERT INTO enrollments (student_id, course_id, semester) VALUES ($1, $2, $3)`, [uuid, cRes.rows[0].id, currentSem]);
+          }
+        }
+      }
+    }
+    await client.query('COMMIT');
+    res.json({ message: "Courses Added Successfully" });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    res.status(500).json({ error: "Failed to enroll in courses" });
+  } finally {
+    client.release();
+  }
+});
+
+// 7. DELETE STUDENT
+app.delete('/api/students/:uuid', async (req, res) => {
+  try {
+    await pool.query(`DELETE FROM students WHERE id = $1`, [req.params.uuid]);
+    res.json({ message: "Student deleted." });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete student." });
+  }
+});
+
+app.listen(port, () => console.log(`🚀 Student Service running on http://localhost:${port}`));

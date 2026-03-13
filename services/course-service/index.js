@@ -4,7 +4,7 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 8082; // Course Service runs on 8082 
+const port = process.env.PORT || 8082; 
 
 // --- MIDDLEWARE ---
 app.use(cors());
@@ -23,7 +23,7 @@ app.get('/api/courses/health', (req, res) => {
   res.send('Course Service is up and running on Port 8082!');
 });
 
-// 2. Add a New Course (POST request)
+// 2. Add a New Course
 app.post('/api/courses', async (req, res) => {
   try {
     const { course_code, course_name, description, credits } = req.body;
@@ -42,7 +42,7 @@ app.post('/api/courses', async (req, res) => {
       name: course.course_name,
       description: course.description,
       credits: course.credits,
-      enrolled: 0
+      enrolled_count: 0 // New courses always start with 0 enrollments
     });
     
   } catch (err) {
@@ -51,18 +51,32 @@ app.post('/api/courses', async (req, res) => {
   }
 });
 
-// 3. Get All Courses (GET request)
+// 3. GET ALL COURSES (UPDATED: Only counts 'Active' enrollments)
 app.get('/api/courses', async (req, res) => {
   try {
-    const allCourses = await pool.query('SELECT * FROM courses ORDER BY course_code ASC');
-    res.json(allCourses.rows);
+    // We added "AND e.status = 'Active'" to the LEFT JOIN
+    const query = `
+      SELECT 
+        c.id, 
+        c.course_code, 
+        c.course_name, 
+        c.description, 
+        c.credits,
+        COUNT(e.student_id)::int AS enrolled_count
+      FROM courses c
+      LEFT JOIN enrollments e ON c.id = e.course_id AND e.status = 'Active'
+      GROUP BY c.id
+      ORDER BY c.course_code ASC;
+    `;
+    const { rows } = await pool.query(query);
+    res.json(rows);
   } catch (err) {
     console.error("Error fetching courses:", err.message);
     res.status(500).json({ error: "Failed to retrieve courses." });
   }
 });
 
-// 4. Update a Course (PUT request)
+// 4. Update a Course
 app.put('/api/courses/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -75,10 +89,8 @@ app.put('/api/courses/:id', async (req, res) => {
       [course_code, course_name, description, credits, id]
     );
 
-    if (updatedCourse.rows.length === 0) {
-      return res.status(404).json({ error: "Course not found." });
-    }
-
+    if (updatedCourse.rows.length === 0) return res.status(404).json({ error: "Course not found." });
+    
     res.json(updatedCourse.rows[0]);
   } catch (err) {
     console.error("Error updating course:", err.message);
@@ -86,19 +98,14 @@ app.put('/api/courses/:id', async (req, res) => {
   }
 });
 
-// 5. Delete a Course (DELETE request)
+// 5. Delete a Course
 app.delete('/api/courses/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedCourse = await pool.query(
-      `DELETE FROM courses WHERE id = $1 RETURNING *`,
-      [id]
-    );
+    const deletedCourse = await pool.query(`DELETE FROM courses WHERE id = $1 RETURNING *`, [id]);
 
-    if (deletedCourse.rows.length === 0) {
-      return res.status(404).json({ error: "Course not found." });
-    }
-
+    if (deletedCourse.rows.length === 0) return res.status(404).json({ error: "Course not found." });
+    
     res.json({ message: "Course deleted successfully." });
   } catch (err) {
     console.error("Error deleting course:", err.message);
@@ -106,7 +113,6 @@ app.delete('/api/courses/:id', async (req, res) => {
   }
 });
 
-// --- START THE SERVER ---
 app.listen(port, () => {
   console.log(`🚀 Course Service is running on http://localhost:${port}`);
 });
