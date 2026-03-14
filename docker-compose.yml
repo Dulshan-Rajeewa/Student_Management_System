@@ -1,0 +1,30 @@
+services:
+  # 1. The React Frontend
+  frontend:
+    build: ./client
+    container_name: kdu_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - CHOKIDAR_USEPOLLING=true # Helps React hot-reload work inside Docker
+
+  # 2. Student Microservice
+  student-service:
+    build: ./services/student-service
+    container_name: kdu_student_service
+    ports:
+      - "8081:8081"
+    
+  # 3. Course Microservice
+  course-service:
+    build: ./services/course-service
+    container_name: kdu_course_service
+    ports:
+      - "8082:8082"
+
+  # 4. Audit Microservice
+  audit-service:
+    build: ./services/audit-service
+    container_name: kdu_audit_service
+    ports:
+      - "8083:8083"

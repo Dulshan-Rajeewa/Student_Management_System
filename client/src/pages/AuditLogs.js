@@ -118,7 +118,6 @@ const AuditLogs = () => {
                     <td>{log.admin}</td>
                     <td><span className={getBadgeClass(log.type)}>{log.type}</span></td>
                     <td>{log.details}</td>
-                    <td style={{ textAlign: 'center' }}><FiMoreHorizontal className="more-icon" /></td>
                   </tr>
                 ))
               ) : (
