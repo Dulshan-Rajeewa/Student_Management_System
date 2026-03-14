@@ -523,3 +523,19 @@ input[type="checkbox"] {
   text-transform: uppercase;
   border-bottom: 1px solid #eee;
 }
+
+.btn-outline {
+  padding: 10px 20px;
+  background: white;
+  border: 1px solid #1a4d8c;
+  color: #1a4d8c;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.btn-outline:hover {
+  background: #1a4d8c;
+  color: white;
+}

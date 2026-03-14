@@ -37,7 +37,6 @@ const ManageStudents = () => {
   useEffect(() => {
     document.title = "Manage Students | KDU SMS";
     
-    // Fetch Students
     const fetchStudents = async () => {
       try {
         const response = await fetch('http://localhost:8081/api/students');
@@ -66,7 +65,6 @@ const ManageStudents = () => {
       } catch (err) { console.error(err); }
     };
 
-    // Fetch Courses (for the search/datalist)
     const fetchCourses = async () => {
       try {
         const response = await fetch('http://localhost:8082/api/courses');
@@ -76,9 +74,9 @@ const ManageStudents = () => {
 
     fetchStudents();
     fetchCourses();
-  }, [refreshTrigger]); // Will re-run when refreshTrigger changes
+  }, [refreshTrigger]);
 
-  // --- FILTERING (SHOWS ALL STUDENTS, NO PAGINATION) ---
+  // --- FILTERING ---
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) || student.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesIntake = filterIntake === 'All' || student.intake === filterIntake;
@@ -132,12 +130,24 @@ const ManageStudents = () => {
     setIsDetailsModalOpen(false); setIsEditModalOpen(true);
   };
 
+  // --- NEW: SINGLE STUDENT BULK ACTION TRIGGERS ---
+  const handleSingleUpgrade = () => {
+    setSelectedIds([viewingStudent.uuid]); // Set ID to just this student
+    setIsDetailsModalOpen(false); // Close profile
+    setIsSemesterModalOpen(true); // Open upgrade modal
+  };
+
+  const handleSingleAddCourse = () => {
+    setSelectedIds([viewingStudent.uuid]);
+    setIsDetailsModalOpen(false);
+    setIsCourseModalOpen(true);
+  };
+
   // --- COURSE DATALIST LOGIC ---
   const handleCourseKeyDown = (e, stateUpdater, currentList) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       const input = courseInput.trim().toUpperCase();
-      // Search database courses
       const courseExists = availableCourses.find(c => c.course_code.toUpperCase() === input || c.course_code.toUpperCase() === input.split(' - ')[0].toUpperCase());
 
       if (courseExists) {
@@ -164,7 +174,7 @@ const ManageStudents = () => {
           name: editingStudent.name,
           address: editingStudent.address,
           status: editingStudent.status,
-          currentCourses: editingStudent.currentCourses // Sends array to backend
+          currentCourses: editingStudent.currentCourses
         })
       });
       if (res.ok) {
@@ -291,14 +301,13 @@ const ManageStudents = () => {
         <Footer />
       </div>
 
-      {/* REUSABLE DATALIST FOR ALL MODALS */}
       <datalist id="db-courses">
         {availableCourses.map(course => (
           <option key={course.id} value={course.course_code}>{course.course_name}</option>
         ))}
       </datalist>
 
-      {/* 1. VIEW STUDENT MODAL */}
+      {/* 1. VIEW STUDENT MODAL (UPDATED WITH NEW BUTTONS) */}
       {isDetailsModalOpen && viewingStudent && (
         <div className="modal-overlay">
           <div className="modal-box large">
@@ -339,7 +348,14 @@ const ManageStudents = () => {
                 </div>
               </div>
             </div>
-            <div className="modal-actions"><button className="btn-cancel" onClick={() => setIsDetailsModalOpen(false)}>Close</button><button className="btn-save" onClick={() => openEditModal(viewingStudent)}>Edit Details</button></div>
+
+            {/* ACTION BUTTONS: Organized with Cancel on left, actions on right */}
+            <div className="modal-actions" style={{ borderTop: '1px solid #eee', paddingTop: '20px', marginTop: '20px', width: '100%', alignItems: 'center' }}>
+              <button className="btn-cancel" onClick={() => setIsDetailsModalOpen(false)} style={{ marginRight: 'auto' }}>Close</button>
+              <button className="btn-outline" onClick={handleSingleUpgrade}>+ Next Semester</button>
+              <button className="btn-outline" onClick={handleSingleAddCourse}>+ Add Course</button>
+              <button className="btn-save" onClick={() => openEditModal(viewingStudent)}>✎ Edit Details</button>
+            </div>
           </div>
         </div>
       )}
@@ -360,7 +376,6 @@ const ManageStudents = () => {
                 </div>
                 <div className="modal-right">
                   <h3 className="modal-section-title">Current Modules (Sem {editingStudent.currentSemester})</h3>
-                  {/* Using DataList here! */}
                   <input type="text" list="db-courses" className="input-group" placeholder="Type module code (Press Enter)" value={courseInput} onChange={e => setCourseInput(e.target.value)} onKeyDown={e => handleCourseKeyDown(e, (list) => setEditingStudent({...editingStudent, currentCourses: list}), editingStudent.currentCourses)} />
                   <div className="course-tags-container">
                     {editingStudent.currentCourses.map(course => <div key={course} className="course-tag">{course} <button type="button" onClick={() => removeCourse(course, (list) => setEditingStudent({...editingStudent, currentCourses: list}), editingStudent.currentCourses)}>✕</button></div>)}
@@ -373,14 +388,14 @@ const ManageStudents = () => {
         </div>
       )}
 
-      {/* 3. BULK ADD COURSE MODAL */}
+      {/* 3. BULK ADD COURSE MODAL (UPDATED to clear selectedIds on cancel) */}
       {isCourseModalOpen && (
-        <div className="modal-overlay"><div className="modal-box mini"><div className="modal-header"><h2>Add Course to {selectedIds.length} Student(s)</h2><button className="close-btn" onClick={() => setIsCourseModalOpen(false)}><FiX /></button></div><form onSubmit={saveBulkCourse}><div className="input-group"><label>Search Course (Press Enter)</label><input type="text" list="db-courses" value={courseInput} onChange={e => setCourseInput(e.target.value)} onKeyDown={(e) => handleCourseKeyDown(e, setBulkCourses, bulkCourses)} /><div className="course-tags-container">{bulkCourses.map(course => (<div key={course} className="course-tag">{course} <button type="button" onClick={() => removeCourse(course, setBulkCourses, bulkCourses)}>✕</button></div>))}</div></div><div className="modal-actions"><button type="button" className="btn-cancel" onClick={() => { setIsCourseModalOpen(false); setBulkCourses([]); }}>Cancel</button><button type="submit" className="btn-save">Enroll</button></div></form></div></div>
+        <div className="modal-overlay"><div className="modal-box mini"><div className="modal-header"><h2>Add Course to {selectedIds.length} Student(s)</h2><button className="close-btn" onClick={() => { setIsCourseModalOpen(false); setSelectedIds([]); }}><FiX /></button></div><form onSubmit={saveBulkCourse}><div className="input-group"><label>Search Course (Press Enter)</label><input type="text" list="db-courses" value={courseInput} onChange={e => setCourseInput(e.target.value)} onKeyDown={(e) => handleCourseKeyDown(e, setBulkCourses, bulkCourses)} /><div className="course-tags-container">{bulkCourses.map(course => (<div key={course} className="course-tag">{course} <button type="button" onClick={() => removeCourse(course, setBulkCourses, bulkCourses)}>✕</button></div>))}</div></div><div className="modal-actions"><button type="button" className="btn-cancel" onClick={() => { setIsCourseModalOpen(false); setBulkCourses([]); setSelectedIds([]); }}>Cancel</button><button type="submit" className="btn-save">Enroll</button></div></form></div></div>
       )}
 
-      {/* 4. BULK NEXT SEMESTER MODAL */}
+      {/* 4. BULK NEXT SEMESTER MODAL (UPDATED to clear selectedIds on cancel) */}
       {isSemesterModalOpen && (
-        <div className="modal-overlay"><div className="modal-box mini"><div className="modal-header"><h2>Upgrade Semester</h2><button className="close-btn" onClick={() => setIsSemesterModalOpen(false)}><FiX /></button></div><form onSubmit={saveBulkSemester}><div className="input-group"><label>Search New Modules (Press Enter)</label><input type="text" list="db-courses" value={courseInput} onChange={e => setCourseInput(e.target.value)} onKeyDown={(e) => handleCourseKeyDown(e, setBulkCourses, bulkCourses)} /><div className="course-tags-container">{bulkCourses.map(course => (<div key={course} className="course-tag">{course} <button type="button" onClick={() => removeCourse(course, setBulkCourses, bulkCourses)}>✕</button></div>))}</div></div><div className="modal-actions"><button type="button" className="btn-cancel" onClick={() => { setIsSemesterModalOpen(false); setBulkCourses([]); }}>Cancel</button><button type="submit" className="btn-save">Confirm Upgrade</button></div></form></div></div>
+        <div className="modal-overlay"><div className="modal-box mini"><div className="modal-header"><h2>Upgrade Semester</h2><button className="close-btn" onClick={() => { setIsSemesterModalOpen(false); setSelectedIds([]); }}><FiX /></button></div><form onSubmit={saveBulkSemester}><div className="input-group"><label>Search New Modules (Press Enter)</label><input type="text" list="db-courses" value={courseInput} onChange={e => setCourseInput(e.target.value)} onKeyDown={(e) => handleCourseKeyDown(e, setBulkCourses, bulkCourses)} /><div className="course-tags-container">{bulkCourses.map(course => (<div key={course} className="course-tag">{course} <button type="button" onClick={() => removeCourse(course, setBulkCourses, bulkCourses)}>✕</button></div>))}</div></div><div className="modal-actions"><button type="button" className="btn-cancel" onClick={() => { setIsSemesterModalOpen(false); setBulkCourses([]); setSelectedIds([]); }}>Cancel</button><button type="submit" className="btn-save">Confirm Upgrade</button></div></form></div></div>
       )}
 
       {/* CONFIRM/MESSAGE MODALS */}
