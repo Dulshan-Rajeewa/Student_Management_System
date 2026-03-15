@@ -29,3 +29,8 @@ yarn-error.log*
 logs
 *.log
 npm-debug.log
+
+# Coverage Reports
+services/student-service/coverage/
+services/course-service/coverage/
+services/audit-service/coverage/

@@ -113,6 +113,13 @@ app.delete('/api/courses/:id', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`🚀 Course Service is running on http://localhost:${port}`);
-});
+// --- EXPORT AND START SERVER ---
+// If we are running this file directly (npm start / docker), start the server.
+// If we are running tests (Jest), just export the app so the test runner can use it.
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`🚀 Course Service is running on http://localhost:${port}`);
+  });
+}
+
+module.exports = app; // Export for testing

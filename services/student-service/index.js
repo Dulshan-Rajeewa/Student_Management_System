@@ -222,4 +222,11 @@ app.delete('/api/students/:uuid', async (req, res) => {
   }
 });
 
-app.listen(port, () => console.log(`🚀 Student Service running on http://localhost:${port}`));
+// --- START THE SERVER ---
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`🚀 Student Service is running on http://localhost:${port}`);
+  });
+}
+
+module.exports = app; // Export for Jest testing
