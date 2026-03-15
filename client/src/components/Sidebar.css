@@ -1,6 +1,6 @@
 .sidebar-container {
   width: 260px;
-  height: calc(100vh - 40px); /* leaves space top & bottom */
+  height: calc(100vh - 40px);
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -10,8 +10,8 @@
   top: 20px;
   left: 20px;
 
-  border-radius: 20px;   /* Rounded corners */
-  overflow: hidden;      /* Keeps children inside rounded edges */
+  border-radius: 20px;
+  overflow: hidden;
 }
 
 .sidebar-logo {
@@ -25,11 +25,11 @@
   user-select: none;
   -webkit-user-drag: none;
   -webkit-user-select: none;
-  pointer-events: none; /* Optional */
+  pointer-events: none;
 }
 
 .sidebar-menu {
-  flex: 1; /* Pushes the profile section to the bottom */
+  flex: 1;
   padding: 20px 0;
   list-style: none;
   margin: 0;
@@ -37,9 +37,9 @@
 
 .sidebar-menu li {
   margin-bottom: 5px;
-  border-radius: 20px;   /* Rounded corners */
-  overflow: hidden;      /* Keeps children inside rounded edges */
-  margin-left: 10px; /* Subtle shift on hover/active */
+  border-radius: 20px;
+  overflow: hidden;
+  margin-left: 10px;
   margin-right: 10px;
 }
 
@@ -74,7 +74,7 @@
 .user-profile {
   margin-top: 35px;
   padding: 15px 20px 20px 20px;
-  border-top: 1px solid #eee;  /* Divider line */
+  border-top: 1px solid #eee;
   font-family: poppins, sans-serif;
   display: flex;
   align-items: center;

@@ -1,7 +1,6 @@
 const request = require('supertest');
 
 // 1. MOCK THE DATABASE 
-// (We use 'var' instead of 'const' to prevent the Jest Hoisting crash!)
 var mockClient = {
   query: jest.fn(),
   release: jest.fn(),
@@ -23,7 +22,7 @@ const app = require('./index');
 describe('Student Service API Unit Tests', () => {
   
   beforeEach(() => {
-    jest.clearAllMocks(); // Reset our fake database before each test
+    jest.clearAllMocks();
   });
 
   // TEST 1: Health Check
@@ -53,7 +52,7 @@ describe('Student Service API Unit Tests', () => {
       uuid: 'abc-123',
       id: 'D/BSE/24/0001',
       first_name: 'Dulshan',
-      enrollments: [] // Fake empty json_agg array
+      enrollments: [] 
     }];
     
     mockPool.query.mockResolvedValue({ rows: fakeDBData });
@@ -68,9 +67,9 @@ describe('Student Service API Unit Tests', () => {
   // TEST 4: The Complex Transaction (Adding a Student)
   it('POST /api/students - should use a transaction to save student and commit', async () => {
     // 1. Fake the INSERT returning a new Student ID
-    mockClient.query.mockResolvedValueOnce(); // Fakes the 'BEGIN'
-    mockClient.query.mockResolvedValueOnce({ rows: [{ id: 'new-uuid', student_number: 'D/BSE/24/0001' }] }); // Fakes the student INSERT
-    mockClient.query.mockResolvedValueOnce(); // Fakes the 'COMMIT'
+    mockClient.query.mockResolvedValueOnce();
+    mockClient.query.mockResolvedValueOnce({ rows: [{ id: 'new-uuid', student_number: 'D/BSE/24/0001' }] }); 
+    mockClient.query.mockResolvedValueOnce(); 
 
     const newStudentPayload = {
       student_number: 'D/BSE/24/0001',
@@ -78,7 +77,7 @@ describe('Student Service API Unit Tests', () => {
       first_name: 'John',
       last_name: 'Doe',
       degree_program: 'BSE',
-      courses: [] // Testing without courses for simplicity
+      courses: []
     };
 
     const res = await request(app)
@@ -89,12 +88,12 @@ describe('Student Service API Unit Tests', () => {
     // Prove that a Database Transaction was actually opened and closed!
     expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
     expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
-    expect(mockClient.release).toHaveBeenCalled(); // Prove the connection was closed safely
+    expect(mockClient.release).toHaveBeenCalled();
   });
 
   // TEST 5: Deleting a Student
   it('DELETE /api/students/:uuid - should delete a student and return 200', async () => {
-    mockPool.query.mockResolvedValue({ rowCount: 1 }); // Fake a successful deletion
+    mockPool.query.mockResolvedValue({ rowCount: 1 });
 
     const res = await request(app).delete('/api/students/abc-123');
 

@@ -4,7 +4,7 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 8083; // Audit Service runs on 8083
+const port = process.env.PORT || 8083;
 
 // --- MIDDLEWARE ---
 app.use(cors());

@@ -10,7 +10,7 @@ const AuditLogs = () => {
   const [filterAdmin, setFilterAdmin] = useState('All');
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8; // Increased to 8 to show more logs
+  const itemsPerPage = 8;
 
   // --- FETCH REAL AUDIT LOGS ---
   useEffect(() => {
@@ -27,7 +27,7 @@ const AuditLogs = () => {
             const dateObj = new Date(log.timestamp);
             return {
               id: log.log_id,
-              date: dateObj.toLocaleDateString('en-CA'), // e.g. 2026-03-14
+              date: dateObj.toLocaleDateString('en-CA'),
               time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
               admin: log.admin_id,
               type: log.action_type,

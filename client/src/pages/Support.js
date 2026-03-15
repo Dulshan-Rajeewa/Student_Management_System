@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 import './Support.css';
-import '../pages/RegisterStudent.css'; // Reusing input styles
+import '../pages/RegisterStudent.css';
 
 const Support = () => {
   useEffect(() => {

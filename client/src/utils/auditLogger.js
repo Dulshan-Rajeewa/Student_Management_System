@@ -1,5 +1,3 @@
-// client/src/utils/auditLogger.js
-
 export const logActivity = async (actionType, entityType, entityId, details) => {
   try {
     // 1. Get the current logged-in admin from localStorage
@@ -13,11 +11,11 @@ export const logActivity = async (actionType, entityType, entityId, details) => 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        admin_id: adminName, // Using name for easy reading in the table
-        action_type: actionType, // 'CREATE', 'UPDATE', 'DELETE'
-        entity_type: entityType, // 'STUDENT', 'COURSE', 'SYSTEM'
-        entity_id: entityId,     // e.g., 'D/BSE/24/0001' or 'SE3032'
-        details: details         // e.g., 'Added new course SE3032'
+        admin_id: adminName,
+        action_type: actionType,
+        entity_type: entityType,
+        entity_id: entityId,
+        details: details
       }),
     });
   } catch (error) {

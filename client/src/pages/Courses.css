@@ -63,24 +63,20 @@
   gap: 8px;
 }
 
-/* icon should not shrink */
 .add-course-toggle svg {
   flex-shrink: 0;
 }
 
-/* hide text initially */
 .add-course-toggle span {
   opacity: 0;
   white-space: nowrap;
   transition: opacity 0.2s ease;
 }
 
-/* expand button */
 .add-course-toggle:hover {
   width: 155px;
 }
 
-/* show text */
 .add-course-toggle:hover span {
   opacity: 1;
 }
@@ -205,8 +201,6 @@
   border-radius: 16px;
   border: 1px dashed #ccc;
 }
-
-/* --- EXISTING CODE ABOVE --- */
 
 /* ================= MODAL STYLES ================= */
 .modal-overlay {
@@ -344,9 +338,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- Add this to the BOTTOM of your Courses.css --- */
-
-/* Custom Modal Additions for Messages & Confirmations */
 .modal-box.small {
   max-width: 400px;
   text-align: center;

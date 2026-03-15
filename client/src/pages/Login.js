@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
 import buildingImg from '../assets/images/building.jpg';
@@ -30,7 +30,6 @@ const Login = () => {
 
     if (loggedInUser) {
       // 1. Save the user details to the browser's memory (localStorage)
-      // We don't save the password for security best practices, even in a mock!
       const userDataToSave = {
         admin_id: loggedInUser.admin_id,
         name: loggedInUser.name,

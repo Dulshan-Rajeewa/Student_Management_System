@@ -25,7 +25,6 @@ const Courses = () => {
             name: dbCourse.course_name,     
             credits: dbCourse.credits,
             description: dbCourse.description,
-            // UPDATED: Now dynamically reads the count from the backend!
             enrolled: dbCourse.enrolled_count || 0 
           }));
 
@@ -83,7 +82,6 @@ const Courses = () => {
 
       if (response.ok) {
         const savedCourse = await response.json();
-        // Add course to UI list with 0 enrollments initially
         setCourses([...courses, {
             id: savedCourse.id,
             code: savedCourse.code,

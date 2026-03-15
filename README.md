@@ -49,16 +49,15 @@ Create a `.env` file inside the following three directories:
 * `services/audit-service/.env`
 
 Add your Supabase Postgres connection string to each file:
-\`\`\`env
+
+```env
 PORT=808X
 DATABASE_URL="postgresql://postgres.[YOUR-PROJECT]:[YOUR-PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?sslmode=require"
-\`\`\`
+```
 
 ### 2. Build and Run
 Open your terminal in the root directory (where `docker-compose.yml` is located) and run:
-\`\`\`bash
-docker-compose up --build
-\`\`\`
+`docker-compose up --build`
 
 ### 3. Access the App
 * Open your browser and navigate to: `http://localhost:3000`

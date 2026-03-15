@@ -229,4 +229,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = app; // Export for Jest testing
+module.exports = app;

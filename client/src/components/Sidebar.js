@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { FiHome, FiUserPlus, FiUsers, FiBook, FiFileText, FiSettings, FiHelpCircle, FiLogOut } from 'react-icons/fi';
 import './Sidebar.css';
-import logoImg from '../assets/logos/kdu-logo.png'; // Make sure this path is correct!
+import logoImg from '../assets/logos/kdu-logo.png';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ const Sidebar = () => {
     if (savedAdmin) {
       const parsedAdmin = JSON.parse(savedAdmin);
       setAdminName(parsedAdmin.name);
-      setAdminInitial(parsedAdmin.name.charAt(0).toUpperCase()); // Gets the first letter for the Avatar
+      setAdminInitial(parsedAdmin.name.charAt(0).toUpperCase());
     }
   }, []);
 

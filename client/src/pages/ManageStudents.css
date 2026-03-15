@@ -262,9 +262,9 @@ input[type="checkbox"] {
   backdrop-filter: blur(2px);
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* Fix for cutoff: allows top-down scrolling */
-  padding: 40px 20px; /* Safe space top and bottom */
-  overflow-y: auto; /* Fix for cutoff: makes the overlay scrollable */
+  align-items: flex-start;
+  padding: 40px 20px;
+  overflow-y: auto;
   z-index: 1000;
 }
 
@@ -276,7 +276,7 @@ input[type="checkbox"] {
   max-width: 500px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   animation: modalFadeIn 0.3s ease;
-  margin: auto; /* Ensures it stays centered vertically if screen is taller than modal */
+  margin: auto;
 }
 
 .modal-box.mini {

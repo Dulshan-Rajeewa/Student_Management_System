@@ -42,7 +42,7 @@ app.post('/api/courses', async (req, res) => {
       name: course.course_name,
       description: course.description,
       credits: course.credits,
-      enrolled_count: 0 // New courses always start with 0 enrollments
+      enrolled_count: 0
     });
     
   } catch (err) {
@@ -54,7 +54,6 @@ app.post('/api/courses', async (req, res) => {
 // 3. GET ALL COURSES (UPDATED: Only counts 'Active' enrollments)
 app.get('/api/courses', async (req, res) => {
   try {
-    // We added "AND e.status = 'Active'" to the LEFT JOIN
     const query = `
       SELECT 
         c.id, 
@@ -114,12 +113,10 @@ app.delete('/api/courses/:id', async (req, res) => {
 });
 
 // --- EXPORT AND START SERVER ---
-// If we are running this file directly (npm start / docker), start the server.
-// If we are running tests (Jest), just export the app so the test runner can use it.
 if (require.main === module) {
   app.listen(port, () => {
     console.log(`🚀 Course Service is running on http://localhost:${port}`);
   });
 }
 
-module.exports = app; // Export for testing
+module.exports = app;

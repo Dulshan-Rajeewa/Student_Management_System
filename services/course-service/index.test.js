@@ -1,9 +1,8 @@
 const request = require('supertest');
-const app = require('./index'); // Import your Express app
-const { Pool } = require('pg'); // Import the Postgres driver
+const app = require('./index');
+const { Pool } = require('pg');
 
 // 1. MOCK THE DATABASE
-// We tell Jest to fake the database connection so we don't accidentally delete real data during tests
 jest.mock('pg', () => {
   const mPool = {
     query: jest.fn(),
@@ -16,7 +15,7 @@ describe('Course Service API Unit Tests', () => {
 
   beforeEach(() => {
     pool = new Pool();
-    jest.clearAllMocks(); // Clear fake database history before every test
+    jest.clearAllMocks();
   });
 
   // TEST 1: Health Check
@@ -42,7 +41,7 @@ describe('Course Service API Unit Tests', () => {
     expect(res.statusCode).toEqual(200);
     expect(res.body.length).toBe(1);
     expect(res.body[0].course_code).toEqual('SE3032');
-    expect(pool.query).toHaveBeenCalledTimes(1); // Prove the DB was called once
+    expect(pool.query).toHaveBeenCalledTimes(1);
   });
 
   // TEST 3: Add New Course
@@ -65,7 +64,7 @@ describe('Course Service API Unit Tests', () => {
 
     expect(res.statusCode).toEqual(201);
     expect(res.body.code).toEqual('IT1010');
-    expect(res.body.enrolled_count).toEqual(0); // Verifying our backend logic works
+    expect(res.body.enrolled_count).toEqual(0);
   });
 
   // TEST 4: Handle Database Error Safely

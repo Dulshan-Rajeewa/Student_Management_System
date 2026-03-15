@@ -2,7 +2,7 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: hidden; /* prevents scrolling */
+  overflow: hidden;
 }
 
 
@@ -16,7 +16,7 @@ html, body {
 
 /* Left side - Image (25%) */
 .login-left {
-  flex: 7; /* 7/16 of screen */
+  flex: 7;
   background-color: #f0f2f5;
   display: flex;
   overflow: hidden;
@@ -27,7 +27,7 @@ html, body {
 .login-left img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* This makes the image fill the space perfectly */
+  object-fit: cover;
   user-select: none;
   -webkit-user-drag: none;
   pointer-events: none;
@@ -35,7 +35,7 @@ html, body {
 
 /* Right side - Login Area */
 .login-right {
-  flex: 9; /* 9/16 of screen */
+  flex: 9;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -59,7 +59,7 @@ html, body {
   margin-bottom: 20px;
   user-select: none;
   -webkit-user-drag: none;
-  pointer-events: none; /* optional */
+  pointer-events: none;
 
 }
 
@@ -88,7 +88,7 @@ html, body {
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 14px;
-  box-sizing: border-box; /* Ensures padding doesn't widen the box */
+  box-sizing: border-box;
 }
 
 /* Links and Buttons */
